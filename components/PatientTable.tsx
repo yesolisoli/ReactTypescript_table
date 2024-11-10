@@ -64,8 +64,8 @@ const PatientTable: React.FC = () => {
     const [patients, setPatients] = useState<PatientTableType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedStatuses, setSelectedStatuses] = useState<PatientStatus[]>(Object.values(PatientStatus));
-    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.NAME);
-    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.ASC);
+    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.ALERT_DATE);  // Default to Screened Date
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);  // Default to DESC (descending)
 
     useEffect(() => {
         const fetchPatients = async () => {
