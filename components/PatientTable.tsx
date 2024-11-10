@@ -161,7 +161,7 @@ const PatientTable: React.FC = () => {
             <div className="overflow-x-auto">
                 <table className="min-w-full table-auto border-collapse">
                     <thead>
-                        <tr>
+                        <tr className="bg-grey50">
                             <th className="border px-4 py-2">Status</th>
                             <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>Patient Info</th>
                             <th className="border px-4 py-2">Location</th>
@@ -177,22 +177,22 @@ const PatientTable: React.FC = () => {
                     </thead>
                     <tbody>
                         {sortedPatients.map((patient) => (
-                            <tr key={patient.emr_id}>
-                                <td className="border px-4 py-2">{patient.status}</td>
+                            <tr key={patient.emr_id} className="group hover:bg-blue1">
+                                <td className={`border px-4 py-2 group-hover:bg-blue1 ${patient.status === PatientStatus.SCREENED ? 'bg-screened_bg' : ''} ${patient.status === PatientStatus.OBSERVING ? 'bg-observing_bg' : ''} ${patient.status === PatientStatus.DONE ? 'bg-done_bg' : ''} ${patient.status === PatientStatus.ERROR ? 'bg-error_bg' : ''} ${patient.status === PatientStatus.DNR ? 'bg-dnr_bg' : ''}`}>{patient.status}</td>
                                 <td className="border px-4 py-2">
                                     {patient.name} ({patient.sex}/{patient.age}) <br />
                                     <span 
                                         onClick={() => handleCopy(patient.emr_id)} 
-                                        className="cursor-pointer text-blue-500 underline">
+                                        className="cursor-pointer text-grey100">
                                         {patient.emr_id}
                                     </span>
                                 </td>
                                 <td className="border px-4 py-2">{patient.location} <br />{patient.admission_dt}</td>
                                 <td className="border px-4 py-2">{patient.department} <br />{patient.doctor}</td>
-                                <td className="border px-4 py-2">
+                                <td className="border px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? `${patient.alert.type}: ${patient.alert.value}` : "None"}
                                 </td>
-                                <td className="border px-4 py-2">
+                                <td className="border px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? `${patient.alert.date}` : "None"}
                                 </td>
                                 {Object.values(VitalType).map((type) => (
