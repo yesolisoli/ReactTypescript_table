@@ -99,6 +99,11 @@ const PatientTable: React.FC = () => {
         setSelectedStatuses(updatedStatuses);
     };
 
+    const handleCopy = (emrId: number) => {
+        navigator.clipboard.writeText(emrId.toString());
+        alert("Copied EMR ID: " + emrId);
+    };
+
     const sortedPatients = [...patients]
         .filter((patient) => selectedStatuses.includes(patient.status))
         .sort((a, b) => {
@@ -174,7 +179,14 @@ const PatientTable: React.FC = () => {
                         {sortedPatients.map((patient) => (
                             <tr key={patient.emr_id}>
                                 <td className="border px-4 py-2">{patient.status}</td>
-                                <td className="border px-4 py-2">{patient.name} ({patient.sex}/{patient.age}) <br />{patient.emr_id}</td>
+                                <td className="border px-4 py-2">
+                                    {patient.name} ({patient.sex}/{patient.age}) <br />
+                                    <span 
+                                        onClick={() => handleCopy(patient.emr_id)} 
+                                        className="cursor-pointer text-blue-500 underline">
+                                        {patient.emr_id}
+                                    </span>
+                                </td>
                                 <td className="border px-4 py-2">{patient.location} <br />{patient.admission_dt}</td>
                                 <td className="border px-4 py-2">{patient.department} <br />{patient.doctor}</td>
                                 <td className="border px-4 py-2">
