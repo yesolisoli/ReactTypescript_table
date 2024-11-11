@@ -3,7 +3,7 @@ import PatientTable from "../components/PatientTable"; // Ensure this path is co
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-between p-24">
+    <div className="flex min-h-screen flex-col items-center justify-between p-24 bg-white text-black">
       <PatientTable />
     </div>
   );

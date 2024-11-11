@@ -110,29 +110,34 @@ const PatientTable: React.FC = () => {
 
     // Sort the patients based on selected column and order
     const sortedPatients = [...patients]
-        .filter((patient) => selectedStatuses.includes(patient.status))
-        .sort((a, b) => {
-            switch (sortColumn) {
-                case SortColumn.NAME:
-                    return sortOrder === SortOrder.ASC ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-                case SortColumn.ALERT_DATE:
-                    const dateA = a.alert ? new Date(a.alert.date).getTime() : 0;
-                    const dateB = b.alert ? new Date(b.alert.date).getTime() : 0;
-                    return sortOrder === SortOrder.ASC ? dateA - dateB : dateB - dateA;
-                case SortColumn.SBP:
-                case SortColumn.DBP:
-                case SortColumn.PR:
-                case SortColumn.RR:
-                case SortColumn.BT:
-                    const findValue = (patient: PatientTableType, type: VitalType) =>
-                        patient.screening_data.find((data) => data.type === type)?.value ?? 0;
-                    const valueA = findValue(a, sortColumn as VitalType);
-                    const valueB = findValue(b, sortColumn as VitalType);
-                    return sortOrder === SortOrder.ASC ? valueA - valueB : valueB - valueA;
-                default:
-                    return 0;
-            }
-        });
+    .filter((patient) => selectedStatuses.includes(patient.status))
+    .sort((a, b) => {
+        switch (sortColumn) {
+            case SortColumn.NAME:
+                return sortOrder === SortOrder.ASC ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            case SortColumn.ALERT_DATE:
+                const dateA = a.alert ? new Date(a.alert.date).getTime() : 0;
+                const dateB = b.alert ? new Date(b.alert.date).getTime() : 0;
+                return sortOrder === SortOrder.ASC ? dateA - dateB : dateB - dateA;
+            case SortColumn.SBP:
+            case SortColumn.DBP:
+            case SortColumn.PR:
+            case SortColumn.RR:
+            case SortColumn.BT:
+                const findValue = (patient: PatientTableType, type: VitalType) =>
+                    patient.screening_data.find((data) => data.type === type)?.value ?? 0;
+
+                // Safely cast to VitalType using unknown first
+                const vitalType = sortColumn as unknown as VitalType;
+
+                const valueA = findValue(a, vitalType);
+                const valueB = findValue(b, vitalType);
+
+                return sortOrder === SortOrder.ASC ? valueA - valueB : valueB - valueA;
+            default:
+                return 0;
+        }
+    });
 
     // Format numerical values, returning "N/A" if the value is 0
     const formatValue = (value: number) => {
