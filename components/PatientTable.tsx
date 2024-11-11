@@ -133,15 +133,25 @@ const PatientTable: React.FC = () => {
         return value !== 0 ? value.toFixed(1) : "N/A";
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string, isTimeIncluded?: boolean) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        const time = `${hours}:${minutes}`;
+        
+        // Only add time if isTimeIncluded is true
+        if (isTimeIncluded) {
+            return `${month}.${day} ${time}`;
+        }
+    
         return `${year}.${month}.${day}`;
     };
 
+    
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -152,6 +162,12 @@ const PatientTable: React.FC = () => {
         } else {
             setSortColumn(column);
             setSortOrder(SortOrder.ASC);
+        }
+    };
+
+    const getSortIcon = (column: SortColumn) => {
+        if (sortColumn === column) {
+            return sortOrder === SortOrder.ASC ? <span className="text-xs">&#x25B2;</span> : <span className="text-xs">&#x25BC;</span>;
         }
     };
 
@@ -175,19 +191,33 @@ const PatientTable: React.FC = () => {
 
             <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
                 <table className="min-w-full table-auto border-collapse">
-                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100">
+                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100 text-xs">
                         <tr>
                             <th className="px-4 py-2">Status</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>Patient Info</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>
+                                Patient Info {sortColumn === SortColumn.NAME && getSortIcon(SortColumn.NAME)}
+                            </th>
                             <th className="px-4 py-2">Location</th>
                             <th className="px-4 py-2">Department</th>
                             <th className="border-l px-4 py-2">Screened Type</th>
-                            <th className="border-r px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.ALERT_DATE)}>Screened Date</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.SBP)}>SBP</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.DBP)}>DBP</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.PR)}>PR</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.RR)}>RR</th>
-                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.BT)}>BT</th>
+                            <th className="border-r px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.ALERT_DATE)}>
+                                Screened Date {sortColumn === SortColumn.ALERT_DATE && getSortIcon(SortColumn.ALERT_DATE)}
+                            </th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.SBP)}>
+                                SBP {sortColumn === SortColumn.SBP && getSortIcon(SortColumn.SBP)}
+                            </th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.DBP)}>
+                                DBP {sortColumn === SortColumn.DBP && getSortIcon(SortColumn.DBP)}
+                            </th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.PR)}>
+                                PR {sortColumn === SortColumn.PR && getSortIcon(SortColumn.PR)}
+                            </th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.RR)}>
+                                RR {sortColumn === SortColumn.RR && getSortIcon(SortColumn.RR)}
+                            </th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.BT)}>
+                                BT {sortColumn === SortColumn.BT && getSortIcon(SortColumn.BT)}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -211,17 +241,17 @@ const PatientTable: React.FC = () => {
                                     {patient.name} ({patient.sex}/{patient.age}) <br />
                                     <span 
                                         onClick={() => handleCopy(patient.emr_id)} 
-                                        className="cursor-pointer text-grey100">
-                                        {patient.emr_id}
+                                        className="cursor-pointer text-xs text-grey100">
+                                        {patient.emr_id} &#x2398;
                                     </span>
                                 </td>
-                                <td className="px-4 py-2">{patient.location} <br /><span className=" text-grey100">{formatDate(patient.admission_dt)}</span></td>
-                                <td className="px-4 py-2">{patient.department} <br />{patient.doctor}</td>
+                                <td className="px-4 py-2">{patient.location} <br /><span className="text-xs text-grey100">{formatDate(patient.admission_dt)}</span></td>
+                                <td className="px-4 py-2">{patient.department} <br /><span className="text-xs text-grey100">{patient.doctor}</span></td>
                                 <td className="border-l px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? `${patient.alert.type}: ${formatValue(patient.alert.value)}` : "None"}
                                 </td>
-                                <td className="border-r px-4 py-2 bg-pink group-hover:bg-blue1">
-                                    {patient.alert ? `${patient.alert.date}` : "None"}
+                                <td className="border-r px-1 py-2 bg-pink group-hover:bg-blue1">
+                                    {patient.alert ? formatDate(patient.alert.date, true) : "None"}
                                 </td>
                                 {Object.values(VitalType).map((type) => (
                                     <td className="px-4 py-2" key={type}>
