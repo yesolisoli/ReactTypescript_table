@@ -63,16 +63,17 @@ interface PatientTableType {
 const PatientTable: React.FC = () => {
     const [patients, setPatients] = useState<PatientTableType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectedStatuses, setSelectedStatuses] = useState<PatientStatus[]>(Object.values(PatientStatus));
-    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.ALERT_DATE);  
-    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);  
+    const [selectedStatuses, setSelectedStatuses] = useState<PatientStatus[]>(Object.values(PatientStatus)); 
+    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.ALERT_DATE);
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);
 
+    // Fetch patient data when the component mounts
     useEffect(() => {
         const fetchPatients = async () => {
             try {
                 const response = await fetch("http://localhost:5001/screening");
                 const data = await response.json();
-                setPatients(data);
+                setPatients(data); 
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching patients:", error);
@@ -83,6 +84,7 @@ const PatientTable: React.FC = () => {
         fetchPatients();
     }, []);
 
+    // Toggle the selected status for filtering patients
     const handleStatusChange = (status: PatientStatus) => {
         let updatedStatuses = [...selectedStatuses];
 
@@ -92,6 +94,7 @@ const PatientTable: React.FC = () => {
             updatedStatuses.push(status);
         }
 
+        // Reset to all statuses if no statuses are selected
         if (updatedStatuses.length === 0) {
             updatedStatuses = Object.values(PatientStatus);
         }
@@ -99,11 +102,13 @@ const PatientTable: React.FC = () => {
         setSelectedStatuses(updatedStatuses);
     };
 
+    // Handle copying the EMR ID to clipboard
     const handleCopy = (emrId: number) => {
         navigator.clipboard.writeText(emrId.toString());
         alert("Copied EMR ID: " + emrId);
     };
 
+    // Sort the patients based on selected column and order
     const sortedPatients = [...patients]
         .filter((patient) => selectedStatuses.includes(patient.status))
         .sort((a, b) => {
@@ -129,10 +134,12 @@ const PatientTable: React.FC = () => {
             }
         });
 
+    // Format numerical values, returning "N/A" if the value is 0
     const formatValue = (value: number) => {
         return value !== 0 ? value.toFixed(1) : "N/A";
     };
 
+    // Format dates, optionally including time
     const formatDate = (dateString: string, isTimeIncluded?: boolean) => {
         const date = new Date(dateString);
         const year = date.getFullYear();
@@ -151,11 +158,12 @@ const PatientTable: React.FC = () => {
         return `${year}.${month}.${day}`;
     };
 
-    
+    // Show loading message if data is still being fetched
     if (loading) {
         return <div>Loading...</div>;
     }
 
+    // Handle sorting when a column header is clicked
     const handleSort = (column: SortColumn) => {
         if (column === sortColumn) {
             setSortOrder(sortOrder === SortOrder.ASC ? SortOrder.DESC : SortOrder.ASC);
@@ -165,15 +173,16 @@ const PatientTable: React.FC = () => {
         }
     };
 
+    // Get the sort icon based on the selected column and order
     const getSortIcon = (column: SortColumn) => {
         if (sortColumn === column) {
-            return sortOrder === SortOrder.ASC ? <span className="text-xs">&#x25B2;</span> : <span className="text-xs">&#x25BC;</span>;
+            return sortOrder === SortOrder.ASC ? <span>&#x25B2;</span> : <span>&#x25BC;</span>;
         }
     };
 
     return (
         <div>
-            <div className="mb-4">
+            <div className="mb-4 text-xs">
                 <div className="flex flex-wrap gap-4">
                     <span>All {Object.values(PatientStatus).length}</span> | 
                     {Object.values(PatientStatus).map((status) => (
@@ -189,34 +198,34 @@ const PatientTable: React.FC = () => {
                 </div>
             </div>
 
-            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto text-xs">
                 <table className="min-w-full table-auto border-collapse">
-                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100 text-xs">
+                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100">
                         <tr>
                             <th className="px-4 py-2">Status</th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>
                                 Patient Info {sortColumn === SortColumn.NAME && getSortIcon(SortColumn.NAME)}
                             </th>
-                            <th className="px-4 py-2">Location</th>
-                            <th className="px-4 py-2">Department</th>
+                            <th className="px-4 py-2"></th>
+                            <th className="px-4 py-2"></th>
                             <th className="border-l px-4 py-2">Screened Type</th>
                             <th className="border-r px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.ALERT_DATE)}>
                                 Screened Date {sortColumn === SortColumn.ALERT_DATE && getSortIcon(SortColumn.ALERT_DATE)}
                             </th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.SBP)}>
-                                SBP {sortColumn === SortColumn.SBP && getSortIcon(SortColumn.SBP)}
+                                SBP {sortColumn === SortColumn.SBP && getSortIcon(SortColumn.SBP)} 
                             </th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.DBP)}>
-                                DBP {sortColumn === SortColumn.DBP && getSortIcon(SortColumn.DBP)}
+                                DBP {sortColumn === SortColumn.DBP && getSortIcon(SortColumn.DBP)} 
                             </th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.PR)}>
-                                PR {sortColumn === SortColumn.PR && getSortIcon(SortColumn.PR)}
+                                PR {sortColumn === SortColumn.PR && getSortIcon(SortColumn.PR)} 
                             </th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.RR)}>
-                                RR {sortColumn === SortColumn.RR && getSortIcon(SortColumn.RR)}
+                                RR {sortColumn === SortColumn.RR && getSortIcon(SortColumn.RR)} 
                             </th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.BT)}>
-                                BT {sortColumn === SortColumn.BT && getSortIcon(SortColumn.BT)}
+                                BT {sortColumn === SortColumn.BT && getSortIcon(SortColumn.BT)} 
                             </th>
                         </tr>
                     </thead>
@@ -241,16 +250,16 @@ const PatientTable: React.FC = () => {
                                     {patient.name} ({patient.sex}/{patient.age}) <br />
                                     <span 
                                         onClick={() => handleCopy(patient.emr_id)} 
-                                        className="cursor-pointer text-xs text-grey100">
+                                        className="cursor-pointer text-grey100">
                                         {patient.emr_id} &#x2398;
                                     </span>
                                 </td>
-                                <td className="px-4 py-2">{patient.location} <br /><span className="text-xs text-grey100">{formatDate(patient.admission_dt)}</span></td>
-                                <td className="px-4 py-2">{patient.department} <br /><span className="text-xs text-grey100">{patient.doctor}</span></td>
+                                <td className="px-4 py-2">{patient.location} <br /><span className="text-grey100">{formatDate(patient.admission_dt)}</span></td>
+                                <td className="px-4 py-2">{patient.department} <br /><span className="text-grey100">{patient.doctor}</span></td>
                                 <td className="border-l px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? `${patient.alert.type}: ${formatValue(patient.alert.value)}` : "None"}
                                 </td>
-                                <td className="border-r px-1 py-2 bg-pink group-hover:bg-blue1">
+                                <td className="border-r px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? formatDate(patient.alert.date, true) : "None"}
                                 </td>
                                 {Object.values(VitalType).map((type) => (
