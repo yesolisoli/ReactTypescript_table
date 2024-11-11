@@ -205,7 +205,7 @@ const PatientTable: React.FC = () => {
 
             <div className="overflow-x-auto max-h-[600px] overflow-y-auto text-xs">
                 <table className="min-w-full table-auto border-collapse">
-                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100">
+                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100 border-b">
                         <tr>
                             <th className="px-4 py-2">Status</th>
                             <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>
