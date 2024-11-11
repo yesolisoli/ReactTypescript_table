@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 // Enum for sort order
 enum SortOrder {
@@ -64,8 +64,8 @@ const PatientTable: React.FC = () => {
     const [patients, setPatients] = useState<PatientTableType[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedStatuses, setSelectedStatuses] = useState<PatientStatus[]>(Object.values(PatientStatus));
-    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.ALERT_DATE);  // Default to Screened Date
-    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);  // Default to DESC (descending)
+    const [sortColumn, setSortColumn] = useState<SortColumn>(SortColumn.ALERT_DATE);  
+    const [sortOrder, setSortOrder] = useState<SortOrder>(SortOrder.DESC);  
 
     useEffect(() => {
         const fetchPatients = async () => {
@@ -129,6 +129,19 @@ const PatientTable: React.FC = () => {
             }
         });
 
+    const formatValue = (value: number) => {
+        return value !== 0 ? value.toFixed(1) : "N/A";
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        return `${year}.${month}.${day}`;
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -145,41 +158,56 @@ const PatientTable: React.FC = () => {
     return (
         <div>
             <div className="mb-4">
-                <h3>Status Filter:</h3>
-                {Object.values(PatientStatus).map((status) => (
-                    <label key={status}>
-                        <input
-                            type="checkbox"
-                            checked={selectedStatuses.includes(status)}
-                            onChange={() => handleStatusChange(status)}
-                        />
-                        {status}
-                    </label>
-                ))}
+                <div className="flex flex-wrap gap-4">
+                    <span>All {Object.values(PatientStatus).length}</span> | 
+                    {Object.values(PatientStatus).map((status) => (
+                        <label key={status} className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                checked={selectedStatuses.includes(status)}
+                                onChange={() => handleStatusChange(status)}
+                            />
+                            <span>{status}</span>
+                        </label>
+                    ))}
+                </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
                 <table className="min-w-full table-auto border-collapse">
-                    <thead>
-                        <tr className="bg-grey50">
-                            <th className="border px-4 py-2">Status</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>Patient Info</th>
-                            <th className="border px-4 py-2">Location</th>
-                            <th className="border px-4 py-2">Department</th>
-                            <th className="border px-4 py-2">Screened Type</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.ALERT_DATE)}>Screened Date</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.SBP)}>SBP</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.DBP)}>DBP</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.PR)}>PR</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.RR)}>RR</th>
-                            <th className="border px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.BT)}>BT</th>
+                    <thead className="bg-grey50 sticky top-0 z-10 text-grey100">
+                        <tr>
+                            <th className="px-4 py-2">Status</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.NAME)}>Patient Info</th>
+                            <th className="px-4 py-2">Location</th>
+                            <th className="px-4 py-2">Department</th>
+                            <th className="border-l px-4 py-2">Screened Type</th>
+                            <th className="border-r px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.ALERT_DATE)}>Screened Date</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.SBP)}>SBP</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.DBP)}>DBP</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.PR)}>PR</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.RR)}>RR</th>
+                            <th className="px-4 py-2 cursor-pointer" onClick={() => handleSort(SortColumn.BT)}>BT</th>
                         </tr>
                     </thead>
                     <tbody>
                         {sortedPatients.map((patient) => (
-                            <tr key={patient.emr_id} className="group hover:bg-blue1">
-                                <td className={`border px-4 py-2 group-hover:bg-blue1 ${patient.status === PatientStatus.SCREENED ? 'bg-screened_bg' : ''} ${patient.status === PatientStatus.OBSERVING ? 'bg-observing_bg' : ''} ${patient.status === PatientStatus.DONE ? 'bg-done_bg' : ''} ${patient.status === PatientStatus.ERROR ? 'bg-error_bg' : ''} ${patient.status === PatientStatus.DNR ? 'bg-dnr_bg' : ''}`}>{patient.status}</td>
-                                <td className="border px-4 py-2">
+                            <tr key={patient.emr_id} className="group hover:bg-blue1 border-b">
+                                <td className="px-4 py-2 text-center">
+                                    <span 
+                                        className={`px-4 py-2 rounded-full ${
+                                            patient.status === PatientStatus.SCREENED ? 'bg-screened_bg text-screened_text' :
+                                            patient.status === PatientStatus.OBSERVING ? 'bg-observing_bg text-observing_text' :
+                                            patient.status === PatientStatus.DONE ? 'bg-done_bg text-done_text' :
+                                            patient.status === PatientStatus.ERROR ? 'bg-error_bg text-error_text' :
+                                            patient.status === PatientStatus.DNR ? 'bg-dnr_bg text-dnr_text' :
+                                            'bg-gray-400 text-dark-gray'
+                                        }`}
+                                    >
+                                        {patient.status}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-2">
                                     {patient.name} ({patient.sex}/{patient.age}) <br />
                                     <span 
                                         onClick={() => handleCopy(patient.emr_id)} 
@@ -187,17 +215,17 @@ const PatientTable: React.FC = () => {
                                         {patient.emr_id}
                                     </span>
                                 </td>
-                                <td className="border px-4 py-2">{patient.location} <br />{patient.admission_dt}</td>
-                                <td className="border px-4 py-2">{patient.department} <br />{patient.doctor}</td>
-                                <td className="border px-4 py-2 bg-pink group-hover:bg-blue1">
-                                    {patient.alert ? `${patient.alert.type}: ${patient.alert.value}` : "None"}
+                                <td className="px-4 py-2">{patient.location} <br /><span className=" text-grey100">{formatDate(patient.admission_dt)}</span></td>
+                                <td className="px-4 py-2">{patient.department} <br />{patient.doctor}</td>
+                                <td className="border-l px-4 py-2 bg-pink group-hover:bg-blue1">
+                                    {patient.alert ? `${patient.alert.type}: ${formatValue(patient.alert.value)}` : "None"}
                                 </td>
-                                <td className="border px-4 py-2 bg-pink group-hover:bg-blue1">
+                                <td className="border-r px-4 py-2 bg-pink group-hover:bg-blue1">
                                     {patient.alert ? `${patient.alert.date}` : "None"}
                                 </td>
                                 {Object.values(VitalType).map((type) => (
-                                    <td className="border px-4 py-2" key={type}>
-                                        {patient.screening_data.find((data) => data.type === type)?.value ?? "N/A"}
+                                    <td className="px-4 py-2" key={type}>
+                                        {formatValue(patient.screening_data.find((data) => data.type === type)?.value ?? 0)}
                                     </td>
                                 ))}
                             </tr>

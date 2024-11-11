@@ -16,8 +16,8 @@ const config: Config = {
     },
     colors: () => ({
       white: "#FFFF",
-      pink: "#ffd1d1",
-      grey50: "#e6e6e6",
+      pink: "#ffeded",
+      grey50: "#f5f5f5",
       grey100: "#505462",
       grey200: "#1B1C1F",
       grey12: "#111214",
